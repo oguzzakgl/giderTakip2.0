@@ -1,0 +1,10 @@
+# Uygulama kütüphaneleri
+
+# BU DOSYA NE İŞE YARAR?
+# Python projenizin hangi kütüphanelere bağımlı olduğunu belirtir.
+# Dockerfile bunu kullanarak kurulumları yapacaktır.
+
+# Eklenecek Kütüphaneler:
+pymysql
+pandas
+matplotlib
