@@ -29,7 +29,7 @@ Kullanıcının sorusu: ${soru}
 Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kullan.`;
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -45,12 +45,12 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
             try { errorData = JSON.parse(errText); } catch (e) { errorData = errText; }
 
             console.error('Gemini API Hatası:', response.status, errorData);
+            const hataDetayi = errorData.error?.message || JSON.stringify(errorData);
             return {
-                statusCode: response.status,
+                statusCode: 200, // Frontend'de hatayı görebilmek için 200 dönüyoruz ama mesaj hata içeriyor
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
                 body: JSON.stringify({
-                    cevap: `⚠️ Gemini API Hatası (${response.status})`,
-                    detay: errorData
+                    cevap: `⚠️ Gemini Hatası (${response.status}): ${hataDetayi}`
                 }),
             };
         }
