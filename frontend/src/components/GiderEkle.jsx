@@ -14,7 +14,7 @@ export default function GiderEkle({ onGiderEkle }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const STORAGE_KEY = 'giderler';
+        const STORAGE_KEY = 'giderTakip_giderler';
         const mevcut = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         const yeniKayit = {
             ...form,

@@ -6,7 +6,7 @@ const NETLIFY_CHAT_URL = '/api/chat';
 
 const HOSGELDIN_MESAJI = `Merhaba! Ben senin **AI Finans Asistanın** 🤖
 
-Harcamalarına bakarak sana kişisel tavsiyeler verebilirim. Например:
+Harcamalarına bakarak sana kişisel tavsiyeler verebilirim. Örneğin:
 
 • _"Bu ay en çok nereye harcamışım?"_
 • _"Fatura giderlerimi nasıl azaltabilirim?"_
@@ -41,9 +41,8 @@ export default function AIChat({ apiUrl = 'http://localhost:8000', giderler = []
         setYukleniyor(true);
 
         try {
-            const chatUrl = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.')
-                ? `${apiUrl}/api/chat`
-                : '/.netlify/functions/chat';
+            // Netlify rewrite kuralı sayesinde hem lokalde hem canlıda /api/chat çalışır
+            const chatUrl = '/api/chat';
 
             const res = await fetch(chatUrl, {
                 method: 'POST',

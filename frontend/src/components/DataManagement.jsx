@@ -6,7 +6,7 @@ const DataManagement = ({ onDataChange }) => {
 
     const exportData = () => {
         const data = {
-            giderler: JSON.parse(localStorage.getItem('giderler') || '[]'),
+            giderler: JSON.parse(localStorage.getItem('giderTakip_giderler') || '[]'),
             butce: JSON.parse(localStorage.getItem('butce') || '0'),
             lastUpdate: new Date().toISOString()
         };
@@ -37,7 +37,7 @@ const DataManagement = ({ onDataChange }) => {
                     throw new Error('Geçersiz dosya formatı!');
                 }
 
-                localStorage.setItem('giderler', JSON.stringify(data.giderler));
+                localStorage.setItem('giderTakip_giderler', JSON.stringify(data.giderler));
                 if (data.butce) localStorage.setItem('butce', JSON.stringify(data.butce));
 
                 showStatus('Veriler başarıyla geri yüklendi!', 'success');
