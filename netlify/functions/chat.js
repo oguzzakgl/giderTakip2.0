@@ -39,32 +39,32 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
             response = await callGemini(modelId, apiKey, prompt);
         }
 
+        // 3. Deneme: Eğer hala 404 ise gemini-1.5-pro dene
+        if (response.status === 404) {
+            modelId = 'gemini-1.5-pro';
+            response = await callGemini(modelId, apiKey, prompt);
+        }
+
         if (!response.ok) {
             const errText = await response.text();
             let errorData;
             try { errorData = JSON.parse(errText); } catch (e) { errorData = errText; }
 
-            console.error(`Gemini API Hatası (${modelId}):`, response.status, errorData);
-
-            // TEŞHİS: 404 hala devam ediyorsa, bu anahtarın hangi modellere erişimi olduğunu sorgula
+            // TEŞHİS: Bu anahtarın hangi modellere erişimi var?
             let availableModels = 'Bilinmiyor';
-            if (response.status === 404) { // Only list models if the final attempt also resulted in 404
-                try {
-                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                    const listData = await listRes.json();
-                    availableModels = listData.models?.map(m => m.name.replace('models/', '')).join(', ') || 'Hiç model bulunamadı';
-                } catch (e) {
-                    availableModels = 'Modeller listelenemedi: ' + e.message;
-                }
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                const listData = await listRes.json();
+                availableModels = listData.models?.map(m => m.name.replace('models/', '')).join(', ') || 'Hiç model bulunamadı';
+            } catch (e) {
+                availableModels = 'Hata: ' + e.message;
             }
 
             return {
                 statusCode: 200,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
                 body: JSON.stringify({
-                    cevap: `⚠️ Gemini Hatası (${response.status}): ${errorData.error?.message || 'Model bulunamadı'}.`,
-                    erisim_saglanan_modeller: availableModels,
-                    not: "Lütfen yukarıdaki modellerden birini kullanmayı dene veya API Key'ini kontrol et."
+                    cevap: `❌ **API Hatası (${response.status})**\n\n**Hata Mesajı:** ${errorData.error?.message || 'Model bulunamadı'}\n\n**Erişebildiğin Modeller:** ${availableModels}\n\n**Öneri:** Eğer liste boşsa API Key hatalıdır. Liste doluysa listeden bir modeli seçmemiz gerekir.`
                 }),
             };
         }
@@ -73,11 +73,10 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
         const cevap = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!cevap) {
-            console.error('Gemini Boş Yanıt Döndü:', data);
             return {
                 statusCode: 200,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-                body: JSON.stringify({ cevap: '⚠️ Gemini boş yanıt döndü.', debug: data }),
+                body: JSON.stringify({ cevap: '⚠️ Gemini boş yanıt döndü. Lütfen farklı bir soru sor.' }),
             };
         }
 
@@ -92,11 +91,10 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
             body: JSON.stringify({ cevap }),
         };
     } catch (err) {
-        console.error('Kritik Hata:', err);
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ cevap: '⚠️ Sistemsel bir hata oluştu.', hata: err.message }),
+            body: JSON.stringify({ cevap: '⚠️ Netlify tarafında sistemsel bir hata oluştu.', detay: err.message }),
         };
     }
 };
