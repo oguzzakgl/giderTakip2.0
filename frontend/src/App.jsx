@@ -26,6 +26,10 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(giderler));
   }, [giderler]);
 
+  const handleGiderEkle = (yeniGider) => {
+    setGiderler(prev => [yeniGider, ...prev]);
+  };
+
   const refreshData = () => {
     try {
       const guncel = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -40,7 +44,7 @@ export default function App() {
       case 'dashboard':
         return <Dashboard giderler={giderler} onDataChange={refreshData} />;
       case 'ekle':
-        return <GiderEkle onGiderEkle={refreshData} />;
+        return <GiderEkle onGiderEkle={handleGiderEkle} />;
       case 'analiz':
         return <ExpenseCharts giderler={giderler} />;
       case 'chat':

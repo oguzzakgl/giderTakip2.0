@@ -32,6 +32,12 @@
     height: 100%;
     padding: 0;
     position: relative;
+    z-index: 10;
+}
+
+.nav-icon,
+.nav-label {
+    pointer-events: none;
 }
 
 .nav-icon {

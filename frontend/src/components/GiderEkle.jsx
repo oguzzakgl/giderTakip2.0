@@ -14,18 +14,13 @@ export default function GiderEkle({ onGiderEkle }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const STORAGE_KEY = 'giderTakip_giderler';
-        const mevcut = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         const yeniKayit = {
             ...form,
             id: Date.now(),
             miktar: parseFloat(form.miktar)
         };
 
-        const guncel = [yeniKayit, ...mevcut];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(guncel));
-
-        if (onGiderEkle) onGiderEkle();
+        if (onGiderEkle) onGiderEkle(yeniKayit);
 
         setSuccess(true);
         setForm({ tarih: new Date().toISOString().split('T')[0], kategori: '', miktar: '', aciklama: '' });
