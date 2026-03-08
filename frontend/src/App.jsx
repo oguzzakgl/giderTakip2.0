@@ -1,27 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import BottomNav from './components/BottomNav';
 import Dashboard from './components/Dashboard';
-import GiderListesi from './components/GiderListesi';
 import GiderEkle from './components/GiderEkle';
 import AIChat from './components/AIChat';
+import ExpenseCharts from './components/ExpenseCharts';
+import DataManagement from './components/DataManagement';
 import './App.css';
 
-// AI Chat için API (sadece Gemini erişimi için)
-// Netlify deploy'da VITE_API_URL env değişkeniyle üstüne yazılır
 const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
-
-
-// Her cihazın kendi giderleri kendi localStorage'ında saklanır
 const STORAGE_KEY = 'giderTakip_giderler';
-
-function storageYukle() {
-  try {
-    const veri = localStorage.getItem(STORAGE_KEY);
-    return veri ? JSON.parse(veri) : [];
-  } catch {
-    return [];
-  }
-}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -41,7 +28,8 @@ export default function App() {
 
   const refreshData = () => {
     try {
-      setGiderler(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+      const guncel = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      setGiderler(guncel);
     } catch {
       setGiderler([]);
     }
@@ -67,9 +55,9 @@ export default function App() {
   return (
     <div className="app">
       <main className="app-main">
-        {renderEkran()}
+        {renderContent()}
       </main>
-      <BottomNav active={aktifEkran} onChange={setAktifEkran} />
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 }
