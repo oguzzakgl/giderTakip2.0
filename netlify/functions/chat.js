@@ -41,29 +41,51 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
 
         if (!response.ok) {
             const errText = await response.text();
-            console.error('Gemini API hatası:', response.status, errText);
+            let errorData;
+            try { errorData = JSON.parse(errText); } catch (e) { errorData = errText; }
+
+            console.error('Gemini API Hatası:', response.status, errorData);
             return {
-                statusCode: 500,
-                body: JSON.stringify({ cevap: '⚠️ AI şu an yanıt veremiyor. Lütfen tekrar dene.' }),
+                statusCode: response.status,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({
+                    cevap: `⚠️ Gemini API Hatası (${response.status})`,
+                    detay: errorData
+                }),
             };
         }
 
         const data = await response.json();
-        const cevap = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt alınamadı.';
+        const cevap = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!cevap) {
+            console.error('Gemini Boş Yanıt Döndü:', data);
+            return {
+                statusCode: 500,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ cevap: '⚠️ Gemini boş yanıt döndü.', ham_veri: data }),
+            };
+        }
 
         return {
             statusCode: 200,
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             body: JSON.stringify({ cevap }),
         };
     } catch (err) {
-        console.error('Fonksiyon hatası:', err);
+        console.error('Netlify Fonksiyonu Kritik Hata:', err);
         return {
             statusCode: 500,
-            body: JSON.stringify({ cevap: '⚠️ AI şu an yanıt veremiyor. Lütfen tekrar dene.' }),
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({
+                cevap: '⚠️ Netlify Fonksiyon Hatası',
+                hata_mesaji: err.message
+            }),
         };
     }
 };

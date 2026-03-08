@@ -36,22 +36,35 @@ export default function AIChat({ apiUrl = 'http://localhost:8000', giderler = []
         setYukleniyor(true);
 
         try {
-            // Netlify'da: /api/chat → netlify/functions/chat.js (GEMINI_API_KEY sunucuda)
-            // Lokalde: apiUrl/api/chat → Docker FastAPI (GEMINI_API_KEY .env'de)
+            // Netlify'da doğrudan fonksiyon yolunu kullanmak yönlendirme sorunlarını önler
             const chatUrl = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.')
                 ? `${apiUrl}/api/chat`
-                : NETLIFY_CHAT_URL;
+                : '/.netlify/functions/chat';
+
+            console.log('İstek atılan URL:', chatUrl);
 
             const res = await fetch(chatUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ soru: soruydu, giderler }),
             });
+
+            if (!res.ok) {
+                const errorBody = await res.json().catch(() => ({}));
+                console.error('Sunucu Hatası:', res.status, errorBody);
+                throw new Error(errorBody.cevap || `HTTP Hatası: ${res.status}`);
+            }
+
             const data = await res.json();
             const aiYanit = { rol: 'ai', metin: data.cevap, zaman: new Date() };
             setMesajlar(prev => [...prev, aiYanit]);
-        } catch {
-            const hataMsg = { rol: 'ai', metin: '⚠️ AI şu an yanıt veremiyor. Lütfen tekrar dene.', zaman: new Date() };
+        } catch (error) {
+            console.error('Chatbot Hatası:', error);
+            const hataMsg = {
+                rol: 'ai',
+                metin: `⚠️ Hata: ${error.message}. Tarayıcı konsoluna (F12) bakarak detayları görebilirsin.`,
+                zaman: new Date()
+            };
             setMesajlar(prev => [...prev, hataMsg]);
         } finally {
             setYukleniyor(false);
