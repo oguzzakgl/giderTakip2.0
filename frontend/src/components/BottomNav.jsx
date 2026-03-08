@@ -4,11 +4,11 @@ import { Home, PlusCircle, PieChart, Settings, Bot } from 'lucide-react';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
   const navItems = [
-    { id: 'dashboard', icon: <Home size={24} />, label: 'Ana Sayfa' },
-    { id: 'ekle', icon: <PlusCircle size={24} />, label: 'Ekle' },
-    { id: 'analiz', icon: <PieChart size={24} />, label: 'Analiz' },
-    { id: 'chat', icon: <Bot size={24} />, label: 'AI Asistan' },
-    { id: 'settings', icon: <Settings size={24} />, label: 'Veri' },
+    { id: 'dashboard', icon: <Home size={22} />, label: 'Ana Sayfa' },
+    { id: 'ekle', icon: <PlusCircle size={22} />, label: 'Ekle' },
+    { id: 'analiz', icon: <PieChart size={22} />, label: 'Analiz' },
+    { id: 'chat', icon: <Bot size={22} />, label: 'Asistan' },
+    { id: 'settings', icon: <Settings size={22} />, label: 'Veri' },
   ];
 
   return (
@@ -19,8 +19,8 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
           className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
           onClick={() => setActiveTab(item.id)}
         >
-          {item.icon}
-          <span>{item.label}</span>
+          <div className="nav-icon">{item.icon}</div>
+          <span className="nav-label">{item.label}</span>
         </button>
       ))}
     </nav>
