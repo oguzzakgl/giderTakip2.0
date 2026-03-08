@@ -28,31 +28,43 @@ Kullanıcının sorusu: ${soru}
 
 Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kullan.`;
 
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                }),
-            }
-        );
+        // 1. Deneme: gemini-1.5-flash
+        let modelId = 'gemini-1.5-flash';
+        let response = await callGemini(modelId, apiKey, prompt);
+
+        // 2. Deneme: Eğer 404 ise flash-latest dene
+        if (response.status === 404) {
+            console.warn('gemini-1.5-flash bulunamadı, flash-latest deneniyor...');
+            modelId = 'gemini-1.5-flash-latest';
+            response = await callGemini(modelId, apiKey, prompt);
+        }
 
         if (!response.ok) {
             const errText = await response.text();
             let errorData;
             try { errorData = JSON.parse(errText); } catch (e) { errorData = errText; }
 
-            console.error('Gemini API Hatası:', response.status, errorData);
-            const msg = errorData.error?.message || JSON.stringify(errorData);
+            console.error(`Gemini API Hatası (${modelId}):`, response.status, errorData);
 
-            // Eğer hala 404 alıyorsak gemini-pro deneyelim mesajı ver
+            // TEŞHİS: 404 hala devam ediyorsa, bu anahtarın hangi modellere erişimi olduğunu sorgula
+            let availableModels = 'Bilinmiyor';
+            if (response.status === 404) { // Only list models if the final attempt also resulted in 404
+                try {
+                    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                    const listData = await listRes.json();
+                    availableModels = listData.models?.map(m => m.name.replace('models/', '')).join(', ') || 'Hiç model bulunamadı';
+                } catch (e) {
+                    availableModels = 'Modeller listelenemedi: ' + e.message;
+                }
+            }
+
             return {
                 statusCode: 200,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
                 body: JSON.stringify({
-                    cevap: `⚠️ Gemini Hatası (${response.status}): ${msg}.`
+                    cevap: `⚠️ Gemini Hatası (${response.status}): ${errorData.error?.message || 'Model bulunamadı'}.`,
+                    erisim_saglanan_modeller: availableModels,
+                    not: "Lütfen yukarıdaki modellerden birini kullanmayı dene veya API Key'ini kontrol et."
                 }),
             };
         }
@@ -63,9 +75,9 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
         if (!cevap) {
             console.error('Gemini Boş Yanıt Döndü:', data);
             return {
-                statusCode: 500,
+                statusCode: 200,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-                body: JSON.stringify({ cevap: '⚠️ Gemini boş yanıt döndü.', ham_veri: data }),
+                body: JSON.stringify({ cevap: '⚠️ Gemini boş yanıt döndü.', debug: data }),
             };
         }
 
@@ -80,17 +92,27 @@ Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kul
             body: JSON.stringify({ cevap }),
         };
     } catch (err) {
-        console.error('Netlify Fonksiyonu Kritik Hata:', err);
+        console.error('Kritik Hata:', err);
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({
-                cevap: '⚠️ Netlify Fonksiyon Hatası',
-                hata_mesaji: err.message
-            }),
+            body: JSON.stringify({ cevap: '⚠️ Sistemsel bir hata oluştu.', hata: err.message }),
         };
     }
 };
+
+async function callGemini(modelId, apiKey, prompt) {
+    return await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            }),
+        }
+    );
+}
 
 function giderlerdenOzetYap(giderler) {
     if (!giderler.length) return 'Kullanıcının henüz hiç harcama kaydı yok.';
