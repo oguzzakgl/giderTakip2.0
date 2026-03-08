@@ -1,44 +1,66 @@
 // Netlify Serverless Function: /api/chat
-// Bu fonksiyon Netlify sunucusunda çalışır — API anahtarı güvenli saklanır
-// Kullanıcının cihazındaki gider listesini ve soruyu alıp Gemini'ye iletir
+// Gemini REST API — SDK bağımlılığı yok, sadece fetch kullanır
 
 exports.handler = async (event) => {
-    // Sadece POST isteklerini kabul et
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: JSON.stringify({ hata: 'Yalnızca POST' }) };
     }
 
     try {
         const { soru, giderler = [] } = JSON.parse(event.body);
+        const apiKey = process.env.GEMINI_API_KEY;
 
-        // Giderlerden finansal özet metni oluştur
+        if (!apiKey) {
+            console.error('GEMINI_API_KEY bulunamadı!');
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ cevap: '⚠️ API anahtarı yapılandırılmamış.' }),
+            };
+        }
+
         const finansalOzet = giderlerdenOzetYap(giderler);
 
-        // Google Generative AI SDK
-        const { GoogleGenerativeAI } = require('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-        const prompt = `
-Sen bir kişisel finans asistanısın. Kullanıcının harcama verileri:
+        const prompt = `Sen bir kişisel finans asistanısın. Kullanıcının harcama verileri:
 
 ${finansalOzet}
 
 Kullanıcının sorusu: ${soru}
 
-Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kullan.
-`;
+Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kullan.`;
 
-        const result = await model.generateContent(prompt);
-        const cevap = result.response.text();
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('Gemini API hatası:', response.status, errText);
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ cevap: '⚠️ AI şu an yanıt veremiyor. Lütfen tekrar dene.' }),
+            };
+        }
+
+        const data = await response.json();
+        const cevap = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt alınamadı.';
 
         return {
             statusCode: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
             body: JSON.stringify({ cevap }),
         };
     } catch (err) {
-        console.error('Gemini hatası:', err);
+        console.error('Fonksiyon hatası:', err);
         return {
             statusCode: 500,
             body: JSON.stringify({ cevap: '⚠️ AI şu an yanıt veremiyor. Lütfen tekrar dene.' }),
