@@ -3,7 +3,7 @@ import './AIChat.css';
 
 // Netlify'da /api/chat → serverless function'a gider (GEMINI_API_KEY sunucuda güvenli)
 // Lokalde apiUrl prop'undan gelir → Docker FastAPI'ye gider
-const NETLIFY_CHAT_URL = '/api/chat'; // Force deploy trigger v5
+const NETLIFY_CHAT_URL = '/api/chat'; // Force deploy trigger v6
 
 
 // setCevap(data.cevap);
