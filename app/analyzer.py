@@ -32,3 +32,34 @@ class DataAnalyzer:
         plt.title('Kategori Bazlı Harcama Dağılımı')
         plt.axis('equal') # Tam yuvarlak olması için
         plt.show()
+
+    def genel_ozet(self, data):
+        """
+        Gelen ham SQL verisini Pandas ile AI'ın anlayabileceği temiz bir metne dönüştürür.
+        """
+        if not data:
+            return "Kullanıcının henüz hiçbir harcama verisi bulunmamaktadır."
+            
+        df = pd.DataFrame(data)
+        toplam_harcama = df['miktar'].sum()
+        islem_sayisi = len(df)
+        
+        # Kategori bazlı toplam
+        grup = df.groupby('kategori')['miktar'].sum()
+        kategori_ozeti = ", ".join([f"{k}: {v} TL" for k, v in grup.items()])
+        
+        # En yüksek işlemi bul. idxmax hata verirse diye try catch ile korunur:
+        try:
+            en_yuksek_index = df['miktar'].idxmax()
+            en_yuksek_islem = df.loc[en_yuksek_index]
+            en_yuksek_metin = f"{en_yuksek_islem['kategori']} kalemi için ({en_yuksek_islem['aciklama']}) {en_yuksek_islem['miktar']} TL"
+        except:
+            en_yuksek_metin = "Bilinmiyor"
+            
+        ozet_metni = (
+            f"Toplam Harcama: {toplam_harcama} TL.\n"
+            f"Toplam İşlem Sayısı: {islem_sayisi} adet.\n"
+            f"Kategorilere Göre Harcamalar: {kategori_ozeti}.\n"
+            f"Tek Seferde Yapılan En Büyük Harcama: {en_yuksek_metin}.\n"
+        )
+        return ozet_metni

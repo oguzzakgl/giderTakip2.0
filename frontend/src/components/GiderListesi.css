@@ -1,0 +1,78 @@
+.gider-listesi {
+    padding-top: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.gider-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.gider-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem 1.1rem;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.gider-item:hover {
+    border-color: var(--border-glow);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-card);
+}
+
+.gider-item__emoji {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-dark-red);
+    border-radius: 50%;
+}
+
+.gider-item__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.gider-item__aciklama {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gider-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gider-item__tarih {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.gider-item__miktar {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+    white-space: nowrap;
+}

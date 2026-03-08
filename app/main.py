@@ -1,12 +1,11 @@
 from database import DatabaseManager
 from analyzer import DataAnalyzer
-
-from database import DatabaseManager
-from analyzer import DataAnalyzer
+from chatbot import FinansalAsistan
 
 def main():
     db = DatabaseManager()
     analyzer = DataAnalyzer()
+    asistan = FinansalAsistan()
     
     while True:
         print("\n--- Gider Takip Sistemi ---")
@@ -14,6 +13,7 @@ def main():
         print("2. Tüm Giderleri Listele")
         print("3. Veri Analizi Yap")
         print("4. Çıkış")
+        print("5. AI Finansal Yorum Al (Gemini)")
         
         secim = input("Seçiminizi yapın: ")
         
@@ -37,6 +37,17 @@ def main():
         elif secim == "4":
             db.close()
             break
+        elif secim == "5":
+            expenses = db.get_all_expenses()
+            ozet_metni = analyzer.genel_ozet(expenses)
+            
+            print("\n- AI Asistan: Sizin için harcama dökümlerinizi derledim.")
+            kullanici_sorusu = input("Bana özel olarak sormak istediğiniz, danışmak istediğiniz bir şey var mı? (Örn: En çok nereye harcamışım?): ")
+            
+            print("\nVerilerinz ve Sorunuz AI'a Gönderiliyor, Lütfen Bekleyin...\n")
+            ai_cevabi = asistan.tavsiye_al(ozet_metni, kullanici_sorusu)
+            print("--- AI GİDER DANIŞMANIYINIZ ONERİSİ ---")
+            print(ai_cevabi)
         else:
             print("Geçersiz seçim!")
 

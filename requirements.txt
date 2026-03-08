@@ -8,3 +8,8 @@
 pymysql
 pandas
 matplotlib
+
+python-dotenv
+google-generativeai
+fastapi
+uvicorn[standard]

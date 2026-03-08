@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ========== DESIGN TOKENS ========== */
+:root {
+  /* Ana Renkler - Kırmızı/Bordo/Siyah Paleti */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #120810;
+  --bg-card: rgba(30, 8, 14, 0.85);
+  --bg-card-hover: rgba(45, 12, 20, 0.95);
+
+  /* Aksan Renkler */
+  --accent-red: #e63946;
+  --accent-crimson: #c1121f;
+  --accent-bordeaux: #780000;
+  --accent-dark-red: #3d0000;
+  --accent-rose: #ff6b7a;
+
+  /* Gradyanlar */
+  --gradient-main: linear-gradient(135deg, #e63946 0%, #780000 100%);
+  --gradient-card: linear-gradient(145deg, rgba(200, 20, 40, 0.12) 0%, rgba(100, 0, 10, 0.05) 100%);
+  --gradient-dark: linear-gradient(180deg, #0a0a0f 0%, #120810 100%);
+
+  /* Metin Renkleri */
+  --text-primary: #f8f0f2;
+  --text-secondary: #b8a0a8;
+  --text-muted: #6e5060;
+  --text-accent: #ff6b7a;
+
+  /* Border */
+  --border-color: rgba(230, 57, 70, 0.2);
+  --border-glow: rgba(230, 57, 70, 0.5);
+
+  /* Gölge */
+  --shadow-card: 0 8px 32px rgba(200, 10, 30, 0.15);
+  --shadow-glow: 0 0 20px rgba(230, 57, 70, 0.25);
+  --shadow-button: 0 4px 16px rgba(230, 57, 70, 0.4);
+
+  /* Boyutlar */
+  --nav-height: 70px;
+  --border-radius: 16px;
+  --border-radius-sm: 10px;
+}
+
+/* ========== RESET & BASE ========== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* App arka plan gradient */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at top right, rgba(120, 0, 0, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(200, 10, 30, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--accent-bordeaux); border-radius: 4px; }
+
+/* ========== TIPOGRAFI ========== */
+h1 { font-size: 1.75rem; font-weight: 800; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+h4 { font-size: 1rem; font-weight: 600; }
+p { font-size: 0.9rem; color: var(--text-secondary); }
+
+/* ========== CARD COMPONENT ========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.card-gradient {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+}
+
+/* ========== BUTONLAR ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  background: var(--gradient-main);
+  color: white;
+  box-shadow: var(--shadow-button);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(230, 57, 70, 0.55);
+  filter: brightness(1.1);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-accent);
+  border: 1px solid var(--border-color);
+}
+
+.btn-ghost:hover {
+  background: rgba(230, 57, 70, 0.1);
+  border-color: var(--accent-red);
+}
+
+.btn-full { width: 100%; }
+
+/* ========== FORM ELEMENTLERİ ========== */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.input-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.input-field {
+  background: rgba(30, 8, 14, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.85rem 1rem;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+  background: rgba(40, 10, 18, 0.8);
+}
+
+.input-field::placeholder { color: var(--text-muted); }
+
+/* ========== BADGE ========== */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.badge-red {
+  background: rgba(230, 57, 70, 0.2);
+  color: var(--accent-rose);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+}
+
+.badge-dark {
+  background: rgba(120, 0, 0, 0.3);
+  color: #ff9aa4;
+  border: 1px solid rgba(120, 0, 0, 0.5);
+}
+
+/* ========== YÜKLEME / SKELETON ========== */
+.skeleton {
+  background: linear-gradient(90deg, rgba(60, 15, 20, 0.5) 25%, rgba(100, 20, 30, 0.5) 50%, rgba(60, 15, 20, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ========== GRADIENT METİN ========== */
+.text-gradient {
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========== DIVIDER ========== */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 1rem 0;
+}
+
+/* ========== PAGE LAYOUT ========== */
+.page {
+  padding: 1.25rem;
+  padding-bottom: calc(var(--nav-height) + 1.5rem);
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* ========== ANIMASYONLAR ========== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(230, 57, 70, 0); }
+}
+
+.animate-in { animation: fadeInUp 0.4s ease forwards; }
+
+/* Staggered card anims */
+.animate-in:nth-child(1) { animation-delay: 0.05s; opacity: 0; }
+.animate-in:nth-child(2) { animation-delay: 0.1s;  opacity: 0; }
+.animate-in:nth-child(3) { animation-delay: 0.15s; opacity: 0; }
+.animate-in:nth-child(4) { animation-delay: 0.2s;  opacity: 0; }
+.animate-in:nth-child(5) { animation-delay: 0.25s; opacity: 0; }
+
+/* ========== RESPONSIVE ========== */
+@media (min-width: 481px) {
+  #root {
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+}
