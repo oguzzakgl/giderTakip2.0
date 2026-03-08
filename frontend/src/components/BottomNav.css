@@ -61,7 +61,7 @@
 .nav-item.active .nav-icon {
     transform: translateY(-4px) scale(1.1);
     color: var(--accent-primary);
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+    filter: drop-shadow(0 0 8px rgba(230, 57, 70, 0.5));
 }
 
 .nav-item.active .nav-label {

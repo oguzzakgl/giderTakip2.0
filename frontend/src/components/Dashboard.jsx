@@ -3,8 +3,8 @@ import './Dashboard.css';
 import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
 
 const KAT_RENK = {
-    Benzin: '#8b5cf6', Fatura: '#ec4899', Market: '#10b981',
-    Eğlence: '#f59e0b', Ulaşım: '#3b82f6', Giyim: '#6366f1', Kira: '#ef4444', Diğer: '#64748b',
+    Benzin: '#e63946', Fatura: '#800000', Market: '#10b981',
+    Eğlence: '#f59e0b', Ulaşım: '#3b82f6', Giyim: '#6366f1', Kira: '#ff4d4d', Diğer: '#64748b',
 };
 
 function hesaplaKategoriler(giderler) {
@@ -111,7 +111,7 @@ export default function Dashboard({ giderler = [], onDataChange }) {
 
             {/* AI Hint */}
             {enCok && (
-                <div className="card" style={{ border: '1px solid rgba(139, 92, 246, 0.2)', background: 'rgba(139, 92, 246, 0.05)' }}>
+                <div className="card" style={{ border: '1px solid rgba(230, 57, 70, 0.2)', background: 'rgba(230, 57, 70, 0.05)' }}>
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                         <div style={{ fontSize: '1.5rem' }}>🤖</div>
                         <div>
