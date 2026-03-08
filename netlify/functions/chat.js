@@ -28,20 +28,38 @@ Kullanıcının sorusu: ${soru}
 
 Türkçe, kısa ve öz, samimi bir dille cevap ver. Gerekirse somut rakamlar kullan.`;
 
-        // Erişilebilir modeller listesinde olan gemini-2.0-flash modelini kullanıyoruz
-        const modelId = 'gemini-2.0-flash';
-        const response = await callGemini(modelId, apiKey, prompt);
+        // Liste içerisindeki kesin isimleri deniyoruz (v1beta için en kararlı olanlar)
+        let modelId = 'gemini-1.5-flash';
+        let response = await callGemini(modelId, apiKey, prompt);
+
+        // Eğer 404 dönerse listedeki kesin ismi (gemini-flash-latest) dene
+        if (response.status === 404) {
+            modelId = 'gemini-flash-latest';
+            response = await callGemini(modelId, apiKey, prompt);
+        }
+
+        // Eğer kota (429) veya hala 404 ise pro sürümüne geç
+        if (response.status === 429 || response.status === 404) {
+            modelId = 'gemini-pro-latest';
+            response = await callGemini(modelId, apiKey, prompt);
+        }
 
         if (!response.ok) {
             const errText = await response.text();
             let errorData;
             try { errorData = JSON.parse(errText); } catch (e) { errorData = errText; }
 
+            const msg = errorData.error?.message || JSON.stringify(errorData);
+
+            const turkceHata = response.status === 429
+                ? "Biliyorum çok heyecanlısın ama Gemini'nin ücretsiz kullanım limitine takıldık. 😅 Birkaç dakika bekleyip tekrar sorar mısın?"
+                : `Üzgünüm, şu an (404/500) yanıt alamıyorum. (${modelId})`;
+
             return {
                 statusCode: 200,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
                 body: JSON.stringify({
-                    cevap: `❌ **API Hatası (${response.status})**\n\n**Mesaj:** ${errorData.error?.message || 'Bir hata oluştu.'}`
+                    cevap: `⚠️ **${turkceHata}**\n\n**Teknik Detay:** ${msg}`
                 }),
             };
         }
