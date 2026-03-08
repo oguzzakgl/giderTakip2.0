@@ -1,26 +1,30 @@
 import './BottomNav.css';
 
-const navItems = [
-  { id: 'dashboard', icon: '📊', label: 'Özet' },
-  { id: 'giderler', icon: '🧾', label: 'Giderler' },
-  { id: 'ekle', icon: '➕', label: 'Ekle' },
-  { id: 'chat', icon: '🤖', label: 'AI Asistan' },
-];
+import { Home, PlusCircle, PieChart, Settings, Bot } from 'lucide-react';
 
-export default function BottomNav({ active, onChange }) {
+const BottomNav = ({ activeTab, setActiveTab }) => {
+  const navItems = [
+    { id: 'dashboard', icon: <Home size={24} />, label: 'Ana Sayfa' },
+    { id: 'ekle', icon: <PlusCircle size={24} />, label: 'Ekle' },
+    { id: 'analiz', icon: <PieChart size={24} />, label: 'Analiz' },
+    { id: 'chat', icon: <Bot size={24} />, label: 'AI Asistan' },
+    { id: 'settings', icon: <Settings size={24} />, label: 'Veri' },
+  ];
+
   return (
     <nav className="bottom-nav">
       {navItems.map((item) => (
         <button
           key={item.id}
-          className={`nav-item ${active === item.id ? 'nav-item--active' : ''}`}
-          onClick={() => onChange(item.id)}
+          className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+          onClick={() => setActiveTab(item.id)}
         >
-          <span className="nav-icon">{item.icon}</span>
-          <span className="nav-label">{item.label}</span>
-          {active === item.id && <span className="nav-indicator" />}
+          {item.icon}
+          <span>{item.label}</span>
         </button>
       ))}
     </nav>
   );
-}
+};
+
+export default BottomNav;

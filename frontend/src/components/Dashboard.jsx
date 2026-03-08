@@ -1,104 +1,126 @@
+import { useState, useEffect } from 'react';
 import './Dashboard.css';
+import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
 
-// Renkler - kategori başına sabit renk paleti
 const KAT_RENK = {
-    Benzin: '#e63946', Fatura: '#c1121f', Market: '#780000',
-    Eğlence: '#9d0208', Ulaşım: '#a50000', Giyim: '#b5000a', Kira: '#d62828', Diğer: '#3d0000',
+    Benzin: '#8b5cf6', Fatura: '#ec4899', Market: '#10b981',
+    Eğlence: '#f59e0b', Ulaşım: '#3b82f6', Giyim: '#6366f1', Kira: '#ef4444', Diğer: '#64748b',
 };
 
-// Kategorileri topla ve sıralı döndür
 function hesaplaKategoriler(giderler) {
     if (!giderler.length) return [];
     const grup = {};
-    giderler.forEach(g => {
-        grup[g.kategori] = (grup[g.kategori] || 0) + Number(g.miktar);
-    });
+    giderler.forEach(g => { grup[g.kategori] = (grup[g.kategori] || 0) + Number(g.miktar); });
     const toplam = Object.values(grup).reduce((s, v) => s + v, 0);
-    return Object.entries(grup)
-        .map(([kategori, miktar]) => ({
-            kategori,
-            miktar,
-            renk: KAT_RENK[kategori] ?? '#6b0000',
-            yuzde: Math.round((miktar / toplam) * 100),
-        }))
-        .sort((a, b) => b.miktar - a.miktar);
+    return Object.entries(grup).map(([kategori, miktar]) => ({
+        kategori, miktar, renk: KAT_RENK[kategori] ?? '#94a3b8', yuzde: Math.round((miktar / toplam) * 100),
+    })).sort((a, b) => b.miktar - a.miktar);
 }
 
-export default function Dashboard({ giderler = [] }) {
+export default function Dashboard({ giderler = [], onDataChange }) {
+    const [butce, setButce] = useState(() => Number(localStorage.getItem('butce') || '5000'));
+    const [yeniButce, setYeniButce] = useState('');
     const kategoriler = hesaplaKategoriler(giderler);
-    const toplam = giderler.reduce((s, g) => s + Number(g.miktar), 0);
+    const toplamGider = giderler.reduce((s, g) => s + Number(g.miktar), 0);
+    const kalanButce = butce - toplamGider;
     const enCok = kategoriler[0];
 
-    return (
-        <div className="page dashboard-page">
-            {/* ---- Başlık ---- */}
-            <header className="dashboard-header animate-in">
-                <div>
-                    <p className="dashboard-greeting">Merhaba 👋</p>
-                    <h1 className="dashboard-title">Gider Takip</h1>
-                </div>
-                <div className="dashboard-avatar">
-                    <span>💸</span>
-                </div>
-            </header>
+    useEffect(() => {
+        localStorage.setItem('butce', butce.toString());
+    }, [butce]);
 
-            {/* ---- Toplam Harcama Kartı ---- */}
-            <div className="total-card animate-in">
-                <div className="total-card__label">Toplam Harcama</div>
-                <div className="total-card__amount">
-                    {toplam.toLocaleString('tr-TR')} <span>TL</span>
-                </div>
-                <div className="total-card__sub">
-                    <span className="badge badge-red">🔴 {giderler.length} İşlem</span>
-                    <span className="total-card__sub-text">{kategoriler.length} kategori</span>
-                </div>
-                <div className="total-card__bg-circle total-card__bg-circle--1" />
-                <div className="total-card__bg-circle total-card__bg-circle--2" />
+    const handleButceGuncelle = () => {
+        if (!yeniButce || isNaN(yeniButce)) return;
+        setButce(Number(yeniButce));
+        setYeniButce('');
+    };
+
+    return (
+        <div className="page animate-in">
+            <div className="page-header">
+                <h1 className="text-gradient">Hoş Geldin!</h1>
             </div>
 
-            {/* ---- Harcama Dağılımı ---- */}
-            <section className="animate-in">
-                <h3 className="section-title">Kategori Dağılımı</h3>
-
-                {kategoriler.length === 0 ? (
-                    <div className="empty-state">
-                        <p>📂 Henüz hiç gider eklenmedi.</p>
+            {/* Premium Bakiye Kartı */}
+            <div className="card" style={{ background: 'var(--gradient-premium)', border: 'none', marginBottom: '1.5rem', color: 'white' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <p style={{ opacity: 0.8, fontSize: '0.85rem' }}>Toplam Bakiyen</p>
+                        <h1 style={{ fontSize: '2.5rem', margin: '0.4rem 0' }}>{kalanButce.toLocaleString()} <span style={{ fontSize: '1.2rem' }}>TL</span></h1>
                     </div>
+                    <Wallet size={32} style={{ opacity: 0.5 }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1.25rem', borderRadius: 'var(--border-radius-sm)' }}>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.8, fontSize: '0.7rem', marginBottom: '0.2rem' }}>
+                            <ArrowUpCircle size={14} /> BÜTÇE
+                        </div>
+                        <p style={{ fontWeight: '700', fontSize: '1.1rem' }}>{butce.toLocaleString()} TL</p>
+                    </div>
+                    <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                    <div style={{ flex: 1, textAlign: 'right' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'flex-end', opacity: 0.8, fontSize: '0.7rem', marginBottom: '0.2rem' }}>
+                            GİDER <ArrowDownCircle size={14} />
+                        </div>
+                        <p style={{ fontWeight: '700', fontSize: '1.1rem' }}>{toplamGider.toLocaleString()} TL</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bütçe Düzenleme */}
+            <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                        type="number"
+                        className="input-field"
+                        style={{ flex: 1, padding: '0.6rem 1rem' }}
+                        value={yeniButce}
+                        onChange={(e) => setYeniButce(e.target.value)}
+                        placeholder="Aylık bütçeni belirle..."
+                    />
+                    <button className="btn btn-primary" style={{ padding: '0 1.25rem' }} onClick={handleButceGuncelle}>
+                        Güncelle
+                    </button>
+                </div>
+            </div>
+
+            {/* Kategori Dağılımı */}
+            <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={20} className="text-gradient" /> Kategori Dağılımı
+            </h3>
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+                {kategoriler.length === 0 ? (
+                    <p style={{ textAlign: 'center', py: '1rem', opacity: 0.6 }}>Henüz harcama yok.</p>
                 ) : (
-                    <div className="bar-chart">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                         {kategoriler.map((item) => (
-                            <div key={item.kategori} className="bar-row">
-                                <div className="bar-row__header">
-                                    <span className="bar-row__name">{item.kategori}</span>
-                                    <span className="bar-row__amount">{item.miktar.toLocaleString('tr-TR')} TL</span>
+                            <div key={item.kategori}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.85rem' }}>
+                                    <span style={{ fontWeight: '600' }}>{item.kategori}</span>
+                                    <span style={{ opacity: 0.8 }}>%{item.yuzde} • {item.miktar} TL</span>
                                 </div>
-                                <div className="bar-track">
-                                    <div
-                                        className="bar-fill"
-                                        style={{
-                                            width: `${item.yuzde}%`,
-                                            background: `linear-gradient(90deg, ${item.renk}, ${item.renk}aa)`,
-                                        }}
-                                    />
+                                <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${item.yuzde}%`, background: item.renk, borderRadius: '10px' }} />
                                 </div>
-                                <span className="bar-row__pct">%{item.yuzde}</span>
                             </div>
                         ))}
                     </div>
                 )}
-            </section>
+            </div>
 
-            {/* ---- AI Hızlı Öneri Banner ---- */}
+            {/* AI Hint */}
             {enCok && (
-                <div className="ai-hint-card animate-in">
-                    <div className="ai-hint-card__icon">🤖</div>
-                    <div className="ai-hint-card__text">
-                        <p className="ai-hint-card__title">AI Asistanın Önerisi</p>
-                        <p className="ai-hint-card__sub">
-                            Bu dönem en çok <strong>{enCok.kategori}</strong> harcaması var ({enCok.miktar.toLocaleString('tr-TR')} TL · %{enCok.yuzde})
-                        </p>
+                <div className="card" style={{ border: '1px solid rgba(139, 92, 246, 0.2)', background: 'rgba(139, 92, 246, 0.05)' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <div style={{ fontSize: '1.5rem' }}>🤖</div>
+                        <div>
+                            <p style={{ fontWeight: '700', fontSize: '0.9rem' }}>AI İpucu</p>
+                            <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                                Bu ay en çok <strong>{enCok.kategori}</strong> ({enCok.miktar} TL) harcaması yaptın.
+                            </p>
+                        </div>
                     </div>
-                    <span className="ai-hint-card__arrow">›</span>
                 </div>
             )}
         </div>

@@ -24,32 +24,43 @@ function storageYukle() {
 }
 
 export default function App() {
-  const [aktifEkran, setAktifEkran] = useState('dashboard');
-  const [giderler, setGiderler] = useState(storageYukle);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [giderler, setGiderler] = useState(() => {
+    try {
+      const veri = localStorage.getItem(STORAGE_KEY);
+      return veri ? JSON.parse(veri) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Giderler değişince otomatik kaydet
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(giderler));
   }, [giderler]);
 
-  // Yeni gider ekle (sadece localStorage'a)
-  const handleGiderEkle = useCallback((yeniGider) => {
-    const yeniKayit = {
-      ...yeniGider,
-      id: Date.now(),
-      miktar: parseFloat(yeniGider.miktar),
-    };
-    setGiderler(prev => [yeniKayit, ...prev]);
-    setAktifEkran('giderler');
-  }, []);
+  const refreshData = () => {
+    try {
+      setGiderler(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    } catch {
+      setGiderler([]);
+    }
+  };
 
-  const renderEkran = () => {
-    switch (aktifEkran) {
-      case 'dashboard': return <Dashboard giderler={giderler} />;
-      case 'giderler': return <GiderListesi giderler={giderler} />;
-      case 'ekle': return <GiderEkle onEkle={handleGiderEkle} />;
-      case 'chat': return <AIChat apiUrl={API_URL} giderler={giderler} />;
-      default: return <Dashboard giderler={giderler} />;
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard giderler={giderler} onDataChange={refreshData} />;
+      case 'ekle':
+        return <GiderEkle onGiderEkle={refreshData} />;
+      case 'analiz':
+        return <ExpenseCharts giderler={giderler} />;
+      case 'chat':
+        return <AIChat apiUrl={API_URL} giderler={giderler} />;
+      case 'settings':
+        return <DataManagement onDataChange={refreshData} />;
+      default:
+        return <Dashboard giderler={giderler} onDataChange={refreshData} />;
     }
   };
 

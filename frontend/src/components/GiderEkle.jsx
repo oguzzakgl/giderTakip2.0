@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import './GiderEkle.css';
-
-// Form verisi gönderildiğinde App.jsx'e onEkle() callback ile bildirilir.
-// API bağlandığında burayı fetch POST'a dönüştüreceğiz:
-// fetch('http://localhost:8000/api/gider-ekle', { method: 'POST', body: JSON.stringify(form) })
-
+import { Calendar, Tag, CreditCard, AlignLeft, Save, Plus } from 'lucide-react';
 
 const KATEGORİLER = ['Benzin', 'Fatura', 'Market', 'Eğlence', 'Ulaşım', 'Giyim', 'Kira', 'Diğer'];
 
-export default function GiderEkle({ onEkle }) {
-    const [form, setForm] = useState({ tarih: '', kategori: '', miktar: '', aciklama: '' });
+export default function GiderEkle({ onGiderEkle }) {
+    const [form, setForm] = useState({ tarih: new Date().toISOString().split('T')[0], kategori: '', miktar: '', aciklama: '' });
     const [success, setSuccess] = useState(false);
 
     const handleChange = (e) => {
@@ -18,90 +14,67 @@ export default function GiderEkle({ onEkle }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Yeni gideri App.jsx'e bildir (state güncelleme orada yapılır)
-        if (onEkle) {
-            onEkle({ ...form, miktar: parseFloat(form.miktar) });
-        }
+        const STORAGE_KEY = 'giderler';
+        const mevcut = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const yeniKayit = {
+            ...form,
+            id: Date.now(),
+            miktar: parseFloat(form.miktar)
+        };
+
+        const guncel = [yeniKayit, ...mevcut];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(guncel));
+
+        if (onGiderEkle) onGiderEkle();
+
         setSuccess(true);
-        setForm({ tarih: '', kategori: '', miktar: '', aciklama: '' });
+        setForm({ tarih: new Date().toISOString().split('T')[0], kategori: '', miktar: '', aciklama: '' });
         setTimeout(() => setSuccess(false), 2000);
     };
 
-
     return (
-        <div className="page gider-ekle">
-            <header className="page-header animate-in">
-                <h2 className="page-title">Yeni Gider Ekle</h2>
-                <span className="badge badge-red">➕</span>
+        <div className="page animate-in">
+            <header className="page-header">
+                <h1 className="text-gradient">Harcama Ekle</h1>
+                <div className="card" style={{ padding: '0.5rem', borderRadius: '50%' }}>
+                    <Plus size={24} color="var(--accent-primary)" />
+                </div>
             </header>
 
             {success && (
-                <div className="success-banner animate-in">
-                    ✅ Gider başarıyla eklendi!
+                <div className="card" style={{ background: 'var(--accent-success)', color: 'white', marginBottom: '1rem', textAlign: 'center', padding: '1rem' }}>
+                    ✅ Harcama başarıyla kaydedildi!
                 </div>
             )}
 
-            <form className="gider-form card animate-in" onSubmit={handleSubmit}>
+            <form className="card animate-in" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
 
                 <div className="input-group">
-                    <label className="input-label">Tarih</label>
-                    <input
-                        type="date"
-                        name="tarih"
-                        value={form.tarih}
-                        onChange={handleChange}
-                        className="input-field"
-                        required
-                    />
+                    <label className="input-label"><Calendar size={14} /> Tarih</label>
+                    <input type="date" name="tarih" value={form.tarih} onChange={handleChange} className="input-field" required />
                 </div>
 
                 <div className="input-group">
-                    <label className="input-label">Kategori</label>
-                    <select
-                        name="kategori"
-                        value={form.kategori}
-                        onChange={handleChange}
-                        className="input-field input-select"
-                        required
-                    >
-                        <option value="">Seçiniz...</option>
-                        {KATEGORİLER.map(k => (
-                            <option key={k} value={k}>{k}</option>
-                        ))}
+                    <label className="input-label"><Tag size={14} /> Kategori</label>
+                    <select name="kategori" value={form.kategori} onChange={handleChange} className="input-field" required>
+                        <option value="">Kategori Seç...</option>
+                        {KATEGORİLER.map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
                 </div>
 
                 <div className="input-group">
-                    <label className="input-label">Miktar (TL)</label>
-                    <input
-                        type="number"
-                        name="miktar"
-                        value={form.miktar}
-                        onChange={handleChange}
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                        className="input-field"
-                        required
-                    />
+                    <label className="input-label"><CreditCard size={14} /> Miktar (TL)</label>
+                    <input type="number" name="miktar" value={form.miktar} onChange={handleChange} placeholder="0.00" min="0" step="0.01" className="input-field" required />
                 </div>
 
                 <div className="input-group">
-                    <label className="input-label">Açıklama</label>
-                    <input
-                        type="text"
-                        name="aciklama"
-                        value={form.aciklama}
-                        onChange={handleChange}
-                        placeholder="Kısa bir açıklama..."
-                        className="input-field"
-                    />
+                    <label className="input-label"><AlignLeft size={14} /> Açıklama</label>
+                    <input type="text" name="aciklama" value={form.aciklama} onChange={handleChange} placeholder="Nereye harcadın?" className="input-field" />
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-full">
-                    💾 Gideri Kaydet
+                <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: '0.5rem' }}>
+                    <Save size={20} /> Kaydet
                 </button>
-
             </form>
         </div>
     );
