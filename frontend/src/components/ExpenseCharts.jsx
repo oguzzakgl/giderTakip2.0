@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, AreaChart, Area } from 'recharts';
 
-const COLORS = ['#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#06b6d4'];
+const COLORS = ['#e63946', '#800000', '#10b981', '#f59e0b', '#3b82f6', '#ff4d4d', '#06b6d4'];
 
 const ExpenseCharts = ({ giderler }) => {
     if (!giderler || giderler.length === 0) {
